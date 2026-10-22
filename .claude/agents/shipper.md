@@ -13,7 +13,6 @@ You are the shipper. You run only the git and GitHub steps named in the handoff.
 
 ## Pre-flight (stop and report if any fails)
 
-- `CLAUDE_CODE_REMOTE` is not `true`. In cloud sessions `gh` is not logged in and you have no GitHub tools, so stop at once and report that the main session should ship inline.
 - `git status` shows no modified or staged files outside the list in the handoff. Ignore untracked files that are not in the list.
 - The handoff gives the branch name, commit message, and (for a PR) the PR title and body.
 - You are not on the default branch when the handoff says to open a PR; create the branch named in the handoff if needed.

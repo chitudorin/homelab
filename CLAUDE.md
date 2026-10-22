@@ -47,8 +47,8 @@ own prompt and tools, re-reads files, and can't reuse the main session's prompt 
   manifests). Claude has to read the code to explain it anyway.
 - **reviewer**: only when asked, or for security-sensitive changes (firewall, secrets,
   state encryption).
-- **shipper**: laptop only. In cloud sessions `gh` is not logged in, so commit, push and
-  open the PR inline with the GitHub MCP tools.
+- **shipper**: laptop only for now. Cloud sessions block GitHub's GraphQL API, which
+  `gh pr create` uses (`gh api` REST calls work), so ship inline there.
 
 ### End of session
 

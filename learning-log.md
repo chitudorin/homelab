@@ -70,5 +70,6 @@ Still to decide: where the OpenTofu state lives (it holds sensitive data and the
 - **Claude inference** (setup changed by Claude, learn mode): work inline by default; a
   subagent starts cold and can't reuse the main session's prompt cache (the cache is per
   model and per exact prefix). Output tokens cost about 5× input, so short answers are
-  cheaper. The shipper is laptop-only. This log stays short; finished milestones move to
-  `learning-archive.md`.
+  cheaper. Cloud sessions block GitHub GraphQL (`gh pr create`) but allow REST (`gh api`);
+  the shipper stays laptop-only until it uses REST. This log stays short; finished
+  milestones move to `learning-archive.md`.
