@@ -31,6 +31,8 @@ and opens a PR for the owner to review on the laptop before merging.
 - Every change comes with a short explanation of the concepts behind it: why this
   resource or approach, what the alternative was, what breaks if it is wrong.
 - Follow with 1–2 quick check questions. Keep everything phone-sized.
+- The owner reviews PRs from the GitHub mobile app. Answer review comments and questions
+  in the PR thread itself, not in chat; in chat, at most a one-line pointer to the PR.
 
 How to tell: if the environment variable `CLAUDE_CODE_REMOTE` is `true`, it is a cloud
 session, so use learn mode; otherwise build mode. The owner can switch at any time by
