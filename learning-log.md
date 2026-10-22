@@ -29,7 +29,8 @@ and apply again to prove the server is disposable.
 
 - [x] State backend: Cloudflare R2 + OpenTofu client-side encryption (`infra/versions.tf`, written by Claude, PR for owner review)
 - [x] Owner: create the R2 bucket + scoped API token by hand, run `tofu init` (see `infra/README.md`)
-- [ ] Owner: SSH key, firewall and server resources, IPv4 output; destroy and re-apply
+- [x] Owner: SSH keys, firewall and server resources, IPv4 output (`infra/main.tf`, written by owner, PR #6)
+- [ ] Owner: `tofu destroy` and re-apply to prove the server is disposable
 
 ## Decisions
 
@@ -41,6 +42,7 @@ and apply again to prove the server is disposable.
 | 4 | State in **Cloudflare R2** (S3 backend) | Free tier (10 GB, no egress fees), account already exists for DNS. Locking via `use_lockfile`, no DynamoDB. |
 | 5 | **Encrypt state client-side** (pbkdf2 + AES-GCM, `enforced = true`) | State holds secrets in plain text; encryption means a leaked bucket key exposes only ciphertext. |
 | 6 | State bucket **created by hand**, not by Tofu | Bootstrap problem: the bucket that stores state can't be managed by that same state. |
+| 7 | Admin ports (22, 6443) allowed from an **auto-detected IP** (`http` data source) | Low risk: keys/certs still guard the ports. Accepted costs: the rule follows whoever last ran apply (lockout from elsewhere), and IP changes need a re-apply (in-place update, no rebuild). Not suitable for CI applies. |
 
 ## Concepts covered
 
@@ -63,6 +65,15 @@ and apply again to prove the server is disposable.
 
 - **Study aid**: Claude made an interactive flashcard deck (21 cards) covering every line of
   PR #4: backend, locking, encryption, variables, providers, lock file.
+
+- **Forces replacement**: some attributes can only be set at creation. Changing `ssh_keys`
+  on `hcloud_server` is a `-/+` (destroy and recreate), because keys are injected by
+  cloud-init at first boot. Always read the plan for `-/+` before typing yes.
+- **Locals vs variables**: variables are a module's inputs; locals are internal named
+  values. Fixed server attributes belong in locals.
+- **Renaming has a cost**: renaming a resource address makes Tofu destroy and recreate it
+  unless a `moved {}` block maps old → new. Renaming an output is free, but breaks anything
+  that reads the old name.
 
 ## Open threads (unanswered questions to revisit)
 
