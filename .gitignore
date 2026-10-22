@@ -1,0 +1,15 @@
+# OpenTofu: local working files and anything that can hold secrets
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+
+# Credentials and cluster access
+*.env
+.envrc
+kubeconfig*
+talosconfig*

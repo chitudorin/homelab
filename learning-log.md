@@ -27,7 +27,8 @@ Goal: `tofu apply` creates an SSH key, a firewall (SSH + 6443 from own IP only, 
 open) and one Cost-Optimized server, and outputs its IPv4 address. Then `tofu destroy`
 and apply again to prove the server is disposable.
 
-Still to decide: where the OpenTofu state lives (it holds sensitive data and the repo is public).
+Status: code written by Claude (PR, learn mode) in `infra/`. Next: owner reviews, creates the
+R2 bucket + tokens, runs `tofu init/apply/destroy/apply` on the laptop.
 
 ## Decisions
 
@@ -36,6 +37,8 @@ Still to decide: where the OpenTofu state lives (it holds sensitive data and the
 | 1 | Start with **1 control-plane node, schedulable** | etcd quorum: 2 nodes tolerate 0 failures, the same as 1, with more to break. Grow to 3 later. |
 | 2 | **Talos Linux** as the Kubernetes OS | API-driven and immutable, so it fits IaC; good for the CV. Owner knows RKE2 already. |
 | 3 | **OpenTofu** for infrastructure | Open-source Terraform fork; native client-side state encryption. |
+| 4 | **State in Cloudflare R2 + OpenTofu encryption** (pbkdf2 → AES-GCM, enforced) | Free (10 GB), S3-compatible, usable from any machine. Encryption means R2 only sees ciphertext. No state locking yet: single operator. |
+| 5 | **Firewall**: 22 + 6443 from own IP only; 80/443 open | Admin surfaces never public; IP passed as a variable so it never lands in the repo. |
 
 ## Concepts covered
 
@@ -44,6 +47,11 @@ Still to decide: where the OpenTofu state lives (it holds sensitive data and the
   and risk split brain without the strict-majority rule.
 - **Control plane down ≠ apps down**: running pods keep running, but nothing gets rescheduled,
   changed or reconciled (Flux included) until the API server is back.
+
+- **State**: OpenTofu's map of real resources to code. Lose it → OpenTofu forgets what it owns;
+  leak it → whatever sensitive attributes it holds leak too. Remote backend + client-side encryption.
+- **Config via env, not files**: provider token (`HCLOUD_TOKEN`), backend endpoint/creds
+  (`AWS_*`), variables (`TF_VAR_*`). Lets the public repo stay secret-free.
 
 ## Open threads (unanswered questions to revisit)
 
@@ -56,5 +64,8 @@ Still to decide: where the OpenTofu state lives (it holds sensitive data and the
   would not recreate it.)
 - **Data vs config**: Git rebuilds configuration, not Ghost posts or Nextcloud files. Where
   do backups live, and how are they restored?
+- **Passphrase bootstrap**: where does the state passphrase live so a fresh laptop can run
+  `tofu plan`? (Asked in session; unanswered.)
+- **State locking**: what goes wrong if two `tofu apply` runs hit the same state at once?
 - **Control-plane resources**: what does Minecraft (2–4 GB) do to etcd on a small schedulable
   control-plane node? Look into resource requests/limits and taints.
