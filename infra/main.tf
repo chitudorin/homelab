@@ -3,7 +3,7 @@ resource "hcloud_server" "node1" {
   image        = "debian-12"
   location     = "fsn1"
   server_type  = "cx23"
-  firewall_ids = [hcloud_firewall.node1firewall.id]
+  firewall_ids = [hcloud_firewall.node1.id]
   public_net {
     ipv4_enabled = true
     ipv6_enabled = true
@@ -12,7 +12,7 @@ resource "hcloud_server" "node1" {
 }
 
 
-resource "hcloud_firewall" "node1firewall" {
+resource "hcloud_firewall" "node1" {
   name = "node1-firewall"
 
   rule {
