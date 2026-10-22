@@ -13,7 +13,7 @@ and note who wrote the code (owner or Claude).
 
 ## Roadmap
 
-1. [ ] **Foundation**: OpenTofu provisions a Hetzner server, firewall and SSH key; state stored safely
+1. [x] **Foundation**: OpenTofu provisions a Hetzner server, firewall and SSH key; state stored safely
 2. [ ] **Cluster**: Talos single node with schedulable workloads, kubeconfig retrieved
 3. [ ] **GitOps**: Flux (or Argo CD) bootstrapped and managing itself from this repo
 4. [ ] **Secrets**: a workable answer for a public repo (SOPS / External Secrets + Infisical or GCP)
@@ -30,7 +30,7 @@ and apply again to prove the server is disposable.
 - [x] State backend: Cloudflare R2 + OpenTofu client-side encryption (`infra/versions.tf`, written by Claude, PR for owner review)
 - [x] Owner: create the R2 bucket + scoped API token by hand, run `tofu init` (see `infra/README.md`)
 - [x] Owner: SSH keys, firewall and server resources, IPv4 output (`infra/main.tf`, written by owner, PR #6)
-- [ ] Owner: `tofu destroy` and re-apply to prove the server is disposable
+- [x] Owner: `tofu destroy` and re-apply to prove the server is disposable
 
 ## Decisions
 
