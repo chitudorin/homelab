@@ -36,10 +36,26 @@ How to tell: if the environment variable `CLAUDE_CODE_REMOTE` is `true`, it is a
 session, so use learn mode; otherwise build mode. The owner can switch at any time by
 saying "build mode" or "learn mode".
 
+### Subagents
+
+The repo is small, so work inline by default. A subagent starts cold: it pays to load its
+own prompt and tools, re-reads files, and can't reuse the main session's prompt cache
+(the cache is per model).
+
+- **scoper**: only to sweep an unfamiliar area with many files; rarely worth it here.
+- **implementer**: learn mode only, for large mechanical changes (e.g. many similar
+  manifests). Claude has to read the code to explain it anyway.
+- **reviewer**: only when asked, or for security-sensitive changes (firewall, secrets,
+  state encryption).
+- **shipper**: laptop only. In cloud sessions `gh` is not logged in, so commit, push and
+  open the PR inline with the GitHub MCP tools.
+
 ### End of session
 
 In both modes, update `learning-log.md`: tick milestones, add decisions and concepts
-learned, and note who wrote the code (owner or Claude).
+learned, and note who wrote the code (owner or Claude). Keep it under ~150 lines, since
+every session reads it. When a milestone is done, move its concepts and closed threads to
+`learning-archive.md`, which is read only when needed.
 
 ## Hard rules (public repo)
 

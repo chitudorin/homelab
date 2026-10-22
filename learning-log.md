@@ -58,3 +58,17 @@ Still to decide: where the OpenTofu state lives (it holds sensitive data and the
   do backups live, and how are they restored?
 - **Control-plane resources**: what does Minecraft (2–4 GB) do to etcd on a small schedulable
   control-plane node? Look into resource requests/limits and taints.
+
+## Cost notes
+
+- **Hetzner** (discussed, no code yet): scale one node up rather than out; the price per GB
+  of RAM drops with size, and each extra node adds an IPv4 and its own Talos overhead. Avoid
+  paid add-ons: a Load Balancer (on one node, use a hostPort ingress), Volumes for bulk data
+  (a Storage Box is far cheaper per TB) and Hetzner Backups (back up data, not the disk).
+  A stopped server is still billed; only deleting it stops the bill. Cost-Optimized plans
+  were unavailable in Oct 2026, so `tofu apply` may fail.
+- **Claude inference** (setup changed by Claude, learn mode): work inline by default; a
+  subagent starts cold and can't reuse the main session's prompt cache (the cache is per
+  model and per exact prefix). Output tokens cost about 5× input, so short answers are
+  cheaper. The shipper is laptop-only. This log stays short; finished milestones move to
+  `learning-archive.md`.
