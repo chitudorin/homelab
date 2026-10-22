@@ -25,8 +25,14 @@ export HCLOUD_TOKEN=...                       # Hetzner project token
 export AWS_ACCESS_KEY_ID=...                  # R2 token access key
 export AWS_SECRET_ACCESS_KEY=...              # R2 token secret
 export AWS_ENDPOINT_URL_S3=https://<account-id>.r2.cloudflarestorage.com
-export TF_VAR_state_passphrase=...            # >= 16 chars; lose it and the state is unreadable
+export TF_VAR_state_passphrase=...            # you invent it, see below
 ```
+
+`state_passphrase` is not issued by any service: you make it up once and reuse it on every
+run. Generate one with `openssl rand -base64 32` and save it in your password manager.
+If it is lost, the state can't be decrypted. The servers keep running, but OpenTofu no
+longer knows it manages them: start a new state with a new passphrase and either
+`tofu import` the resources or delete them in the Hetzner console and apply again.
 
 Then:
 
