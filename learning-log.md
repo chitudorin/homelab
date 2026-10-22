@@ -61,6 +61,9 @@ and apply again to prove the server is disposable.
   attacks, e.g. a tampered provider download). It holds no secrets, so it
   is committed. State describes real infrastructure and holds secrets, so it never is.
 
+- **Study aid**: Claude made an interactive flashcard deck (21 cards) covering every line of
+  PR #4: backend, locking, encryption, variables, providers, lock file.
+
 ## Open threads (unanswered questions to revisit)
 
 - **GitOps vs "config in Git"**: what does a pull-based controller (Flux) give you that a CI
