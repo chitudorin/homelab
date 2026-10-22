@@ -43,6 +43,11 @@ saying "build mode" or "learn mode".
 In both modes, update `learning-log.md`: tick milestones, add decisions and concepts
 learned, and note who wrote the code (owner or Claude).
 
+## Conventions
+
+- Commits and PR titles follow [Conventional Commits](https://www.conventionalcommits.org/):
+  `type(scope): summary`, e.g. `feat(infra): ...`, `docs(learning-log): ...`.
+
 ## Hard rules (public repo)
 
 - Never commit secrets, API tokens, kubeconfigs, talosconfigs or `*.tfstate` files.
