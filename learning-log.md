@@ -54,6 +54,11 @@ and apply again to prove the server is disposable.
   in R2) stops two `apply` runs from writing state at the same time and corrupting it.
 - **Two layers of protection**: R2 token scope (who can read the bucket) and state
   encryption (what they can read). The passphrase is now the single key to recover state.
+  Stolen bucket keys: an attacker can delete or overwrite state but not read it, and can't
+  edit it undetected (AES-GCM is authenticated, so tampered state fails to decrypt).
+- **Lock file vs state file**: `.terraform.lock.hcl` pins exact provider versions and their
+  checksums, so every machine and CI run gets the same binaries. It holds no secrets, so it
+  is committed. State describes real infrastructure and holds secrets, so it never is.
 
 ## Open threads (unanswered questions to revisit)
 
