@@ -28,7 +28,7 @@ open) and one Cost-Optimized server, and outputs its IPv4 address. Then `tofu de
 and apply again to prove the server is disposable.
 
 - [x] State backend: Cloudflare R2 + OpenTofu client-side encryption (`infra/versions.tf`, written by Claude, PR for owner review)
-- [ ] Owner: create the R2 bucket + scoped API token by hand, run `tofu init` (see `infra/README.md`)
+- [x] Owner: create the R2 bucket + scoped API token by hand, run `tofu init` (see `infra/README.md`)
 - [ ] Owner: SSH key, firewall and server resources, IPv4 output; destroy and re-apply
 
 ## Decisions
@@ -57,7 +57,8 @@ and apply again to prove the server is disposable.
   Stolen bucket keys: an attacker can delete or overwrite state but not read it, and can't
   edit it undetected (AES-GCM is authenticated, so tampered state fails to decrypt).
 - **Lock file vs state file**: `.terraform.lock.hcl` pins exact provider versions and their
-  checksums, so every machine and CI run gets the same binaries. It holds no secrets, so it
+  checksums, so every machine and CI run gets the same binaries (protects against supply-chain
+  attacks, e.g. a tampered provider download). It holds no secrets, so it
   is committed. State describes real infrastructure and holds secrets, so it never is.
 
 ## Open threads (unanswered questions to revisit)
