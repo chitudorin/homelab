@@ -6,6 +6,11 @@ terraform {
       source  = "hetznercloud/hcloud"
       version = "~> 1.70"
     }
+
+    http = {
+      source  = "hashicorp/http"
+      version = "~> 3.6.3"
+    }
   }
 
   # State lives in a Cloudflare R2 bucket, spoken to through the S3 API.
