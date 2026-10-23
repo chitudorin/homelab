@@ -1,0 +1,13 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:recommended',
+    ':semanticCommits', // chore(deps): ..., matching the repo's Conventional Commits
+  ],
+
+  // Supply-chain cooldown: only propose versions that have been public for 7 days.
+  // A hijacked release is usually spotted and pulled within hours or days, so
+  // someone else finds it first. Security-advisory updates skip this wait.
+  // Held-back updates are listed in the Dependency Dashboard issue.
+  minimumReleaseAge: '7 days',
+}

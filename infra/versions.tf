@@ -1,14 +1,18 @@
 terraform {
   required_version = ">= 1.10"
 
+  # Full registry addresses: tofu treats "hetznercloud/hcloud" the same way, but
+  # Renovate assumes registry.terraform.io for short names, can't match them to
+  # the registry.opentofu.org entries in .terraform.lock.hcl, and never proposes
+  # in-range updates.
   required_providers {
     hcloud = {
-      source  = "hetznercloud/hcloud"
+      source  = "registry.opentofu.org/hetznercloud/hcloud"
       version = "~> 1.70"
     }
 
     http = {
-      source  = "hashicorp/http"
+      source  = "registry.opentofu.org/hashicorp/http"
       version = "~> 3.6.3"
     }
   }
