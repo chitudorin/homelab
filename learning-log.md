@@ -31,6 +31,8 @@ and apply again to prove the server is disposable.
 - [x] Owner: create the R2 bucket + scoped API token by hand, run `tofu init` (see `infra/README.md`)
 - [x] Owner: SSH keys, firewall and server resources, IPv4 output (`infra/main.tf`, written by owner, PR #6)
 - [x] Owner: `tofu destroy` and re-apply to prove the server is disposable
+- [x] Provider updates: Renovate with a 7-day cooldown (`renovate.json5`, full provider addresses in `infra/versions.tf`, written by Claude, PR for owner review)
+- [ ] Owner: after merging, install the Renovate GitHub App on this repo only
 
 ## Decisions
 
@@ -43,6 +45,8 @@ and apply again to prove the server is disposable.
 | 5 | **Encrypt state client-side** (pbkdf2 + AES-GCM, `enforced = true`) | State holds secrets in plain text; encryption means a leaked bucket key exposes only ciphertext. |
 | 6 | State bucket **created by hand**, not by Tofu | Bootstrap problem: the bucket that stores state can't be managed by that same state. |
 | 7 | Admin ports (22, 6443) allowed from an **auto-detected IP** (`http` data source) | Low risk: keys/certs still guard the ports. Accepted costs: the rule follows whoever last ran apply (lockout from elsewhere), and IP changes need a re-apply (in-place update, no rebuild). Not suitable for CI applies. |
+| 8 | **Renovate** with `minimumReleaseAge: 7 days` for provider updates | A cooldown lets others catch a hijacked release before it reaches the lock file. Renovate reads OpenTofu release dates; Dependabot's OpenTofu support is community-maintained. Security fixes skip the wait. |
+| 9 | Provider `source` written as **full addresses** (`registry.opentofu.org/...`) | Renovate matches providers to lock file entries by registry host and assumes `registry.terraform.io` for short names, so it never proposed in-range updates. Tofu resolves both forms to the same address: no lock or state change. |
 
 ## Concepts covered
 
@@ -62,6 +66,14 @@ and apply again to prove the server is disposable.
   checksums, so every machine and CI run gets the same binaries (protects against supply-chain
   attacks, e.g. a tampered provider download). It holds no secrets, so it
   is committed. State describes real infrastructure and holds secrets, so it never is.
+- **`init` vs `init -upgrade`**: plain `init` installs exactly what the lock file says and
+  checks the hashes (run it after merging an update PR). `-upgrade` ignores the lock and
+  takes the newest version the constraint allows, even one released minutes ago, which
+  skips the cooldown.
+- **Pessimistic constraint `~>`**: only the last number written may grow. `~> 1.70` allows
+  1.71 and 1.70.1 but not 2.0; `~> 3.6.3` allows patches only. Renovate updates in-range
+  versions in the lock file only, and proposes a new major in a separate PR that rewrites
+  the constraint. Owner got both right.
 
 - **Study aid**: Claude made an interactive flashcard deck (21 cards) covering every line of
   PR #4: backend, locking, encryption, variables, providers, lock file.
