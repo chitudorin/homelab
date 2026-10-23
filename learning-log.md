@@ -47,6 +47,7 @@ and apply again to prove the server is disposable.
 | 7 | Admin ports (22, 6443) allowed from an **auto-detected IP** (`http` data source) | Low risk: keys/certs still guard the ports. Accepted costs: the rule follows whoever last ran apply (lockout from elsewhere), and IP changes need a re-apply (in-place update, no rebuild). Not suitable for CI applies. |
 | 8 | **Renovate** with `minimumReleaseAge: 7 days` for provider updates | A cooldown lets others catch a hijacked release before it reaches the lock file. Renovate reads OpenTofu release dates; Dependabot's OpenTofu support is community-maintained. Security fixes skip the wait. |
 | 9 | Provider `source` written as **full addresses** (`registry.opentofu.org/...`) | Renovate matches providers to lock file entries by registry host and assumes `registry.terraform.io` for short names, so it never proposed in-range updates. Tofu resolves both forms to the same address: no lock or state change. |
+| 10 | **Workflow deletes the head branch on every PR close** (Claude wrote it) | GitHub's auto-delete setting only fires on merge, so closed-unmerged branches piled up. Skips fork PRs (read-only token) and the default branch. |
 
 ## Concepts covered
 
@@ -86,6 +87,11 @@ and apply again to prove the server is disposable.
 - **Renaming has a cost**: renaming a resource address makes Tofu destroy and recreate it
   unless a `moved {}` block maps old → new. Renaming an output is free, but breaks anything
   that reads the old name.
+
+- **`pull_request` vs `pull_request_target`**: `pull_request` runs with the PR's code and,
+  for forks, a read-only token. `pull_request_target` runs base-branch code with a write
+  token, which is dangerous if it checks out the PR. Deleting a same-repo branch only needs
+  `pull_request` + `contents: write`.
 
 ## Open threads (unanswered questions to revisit)
 
