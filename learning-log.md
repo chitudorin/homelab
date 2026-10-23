@@ -93,7 +93,7 @@ and apply again to prove the server is disposable.
   unless a `moved {}` block maps old → new. Renaming an output is free, but breaks anything
   that reads the old name.
 
-- **CI for IaC** (PR #8): `pull_request` runs the PR's code without secrets for forks;
+- **CI for IaC** (PR #10): `pull_request` runs the PR's code without secrets for forks;
   `pull_request_target` runs with secrets in the base repo's context, which is how public
   repos get their secrets stolen, so it is never used here. Environments scope secrets and
   add approval + branch rules. `permissions: contents: read` limits the job token.
@@ -108,7 +108,7 @@ and apply again to prove the server is disposable.
   ports 50000 and 6443 from wherever apply runs, and GitHub-hosted runners have changing IPs.
   Options: open 50000/6443 to the world and rely on Talos/Kubernetes mTLS; add the runner's
   IP with the hcloud CLI for the job and remove it after; Tailscale on the runner; a
-  self-hosted runner on the Proxmox homelab. Recommendation in PR #8; decide before 2c.
+  self-hosted runner on the Proxmox homelab. Recommendation in PR #10; decide before 2c.
 
 - **GitOps vs "config in Git"**: what does a pull-based controller (Flux) give you that a CI
   job running `kubectl apply` doesn't? (Hint: drift after a manual `kubectl edit`.) Which tool
