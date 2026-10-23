@@ -3,6 +3,11 @@
   extends: [
     'config:recommended',
     ':semanticCommits', // chore(deps): ..., matching the repo's Conventional Commits
+    // Pin every GitHub Action to a commit SHA (tags can be moved to malicious
+    // code) and keep the SHA and its "# vX.Y.Z" comment up to date.
+    'helpers:pinGitHubActionDigests',
+    // Updates values marked "# renovate: ..." in workflows, e.g. TOFU_VERSION.
+    'customManagers:githubActionsVersions',
   ],
 
   // Supply-chain cooldown: only propose versions that have been public for 7 days.
