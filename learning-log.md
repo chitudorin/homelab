@@ -33,6 +33,8 @@ and apply again to prove the server is disposable.
 - [x] Owner: `tofu destroy` and re-apply to prove the server is disposable
 - [x] Provider updates: Renovate with a 7-day cooldown (`renovate.json5`, full provider addresses in `infra/versions.tf`, written by Claude, PR for owner review)
 - [ ] Owner: after merging, install the Renovate GitHub App on this repo only
+- [x] Tofu in GitHub Actions: PR plan, approved apply on `main`, firewall IPs from a secret (`.github/workflows/tofu.yml`, `infra/`, written by Claude, PR for owner review)
+- [ ] Owner: create the `infra-plan` / `infra-apply` environments, read-only tokens and secrets (see `infra/README.md`), export `TF_VAR_admin_cidrs` locally
 
 ## Decisions
 
@@ -44,9 +46,13 @@ and apply again to prove the server is disposable.
 | 4 | State in **Cloudflare R2** (S3 backend) | Free tier (10 GB, no egress fees), account already exists for DNS. Locking via `use_lockfile`, no DynamoDB. |
 | 5 | **Encrypt state client-side** (pbkdf2 + AES-GCM, `enforced = true`) | State holds secrets in plain text; encryption means a leaked bucket key exposes only ciphertext. |
 | 6 | State bucket **created by hand**, not by Tofu | Bootstrap problem: the bucket that stores state can't be managed by that same state. |
-| 7 | Admin ports (22, 6443) allowed from an **auto-detected IP** (`http` data source) | Low risk: keys/certs still guard the ports. Accepted costs: the rule follows whoever last ran apply (lockout from elsewhere), and IP changes need a re-apply (in-place update, no rebuild). Not suitable for CI applies. |
+| 7 | ~~Admin ports (22, 6443) allowed from an **auto-detected IP** (`http` data source)~~ **Superseded by 10.** | Low risk: keys/certs still guard the ports. Accepted costs: the rule follows whoever last ran apply (lockout from elsewhere), and IP changes need a re-apply (in-place update, no rebuild). Not suitable for CI applies. |
 | 8 | **Renovate** with `minimumReleaseAge: 7 days` for provider updates | A cooldown lets others catch a hijacked release before it reaches the lock file. Renovate reads OpenTofu release dates; Dependabot's OpenTofu support is community-maintained. Security fixes skip the wait. |
 | 9 | Provider `source` written as **full addresses** (`registry.opentofu.org/...`) | Renovate matches providers to lock file entries by registry host and assumes `registry.terraform.io` for short names, so it never proposed in-range updates. Tofu resolves both forms to the same address: no lock or state change. |
+| 10 | Admin ports allowed from **`admin_cidrs`**, a `sensitive` variable set from the environment / a GitHub secret | Works the same from laptop and CI (an auto-detected IP would be the runner's, locking the owner out). Never in the repo, and redacted in public Actions logs. Cost: when the home IP changes, update the secret and re-run. |
+| 11 | **Tofu runs in GitHub Actions**: plan on PRs, apply on `main` after the owner approves | Infra changes become reviewed merges, not laptop commands. Local applies still work; laptop and CI share state and its lock. |
+| 12 | **Two environments**: `infra-plan` (no approval, read-only tokens) and `infra-apply` (owner approval, `main` only, read/write tokens) | Environment secrets reach a job only after the environment's rules pass. Plans need state but not write access, so PRs get read-only tokens without an approval click; anything that can change infra waits for the owner. |
+| 13 | Apply runs the **saved, encrypted plan** from the same run | You approve the plan you saw; if state changed meanwhile, tofu rejects the stale plan instead of applying something else. No changes → no approval asked. |
 
 ## Concepts covered
 
@@ -87,7 +93,22 @@ and apply again to prove the server is disposable.
   unless a `moved {}` block maps old → new. Renaming an output is free, but breaks anything
   that reads the old name.
 
+- **CI for IaC** (PR #8): `pull_request` runs the PR's code without secrets for forks;
+  `pull_request_target` runs with secrets in the base repo's context, which is how public
+  repos get their secrets stolen, so it is never used here. Environments scope secrets and
+  add approval + branch rules. `permissions: contents: read` limits the job token.
+  `concurrency` stops two runs overlapping; the state lock protects state even across
+  laptop and CI. Actions are pinned by commit SHA because tags can be moved; Renovate
+  updates the SHAs. `sensitive = true` redacts values in plans, and GitHub's own masking
+  would miss them (it only masks the whole secret string, not each list element).
+
 ## Open threads (unanswered questions to revisit)
+
+- **Talos API from CI** (before milestone 2c): the `siderolabs/talos` provider must reach
+  ports 50000 and 6443 from wherever apply runs, and GitHub-hosted runners have changing IPs.
+  Options: open 50000/6443 to the world and rely on Talos/Kubernetes mTLS; add the runner's
+  IP with the hcloud CLI for the job and remove it after; Tailscale on the runner; a
+  self-hosted runner on the Proxmox homelab. Recommendation in PR #8; decide before 2c.
 
 - **GitOps vs "config in Git"**: what does a pull-based controller (Flux) give you that a CI
   job running `kubectl apply` doesn't? (Hint: drift after a manual `kubectl edit`.) Which tool

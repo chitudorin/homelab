@@ -10,11 +10,6 @@ terraform {
       source  = "registry.opentofu.org/hetznercloud/hcloud"
       version = "~> 1.70"
     }
-
-    http = {
-      source  = "registry.opentofu.org/hashicorp/http"
-      version = "~> 3.6.3"
-    }
   }
 
   # State lives in a Cloudflare R2 bucket, spoken to through the S3 API.

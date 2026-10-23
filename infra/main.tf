@@ -36,21 +36,17 @@ resource "hcloud_firewall" "node1" {
   }
 
   rule {
-    direction = "in"
-    protocol  = "tcp"
-    port      = "22"
-    source_ips = [
-      "${local.my_ip}/32"
-    ]
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "22"
+    source_ips = var.admin_cidrs
   }
 
   rule {
-    direction = "in"
-    protocol  = "tcp"
-    port      = "6443"
-    source_ips = [
-      "${local.my_ip}/32"
-    ]
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "6443"
+    source_ips = var.admin_cidrs
   }
 
 }
@@ -64,12 +60,4 @@ resource "hcloud_ssh_key" "mac" {
 resource "hcloud_ssh_key" "win" {
   name       = "win-ssh-key"
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICZU1owi9k3opPGYWVnd9T1u7IyUpxvvkkdbHwmU+Py5"
-}
-
-data "http" "own_ip" {
-  url = "https://ipv4.wtfismyip.com/text"
-}
-
-locals {
-  my_ip = chomp(data.http.own_ip.response_body)
 }
