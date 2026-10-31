@@ -1,4 +1,4 @@
-name: Automated Code Review (Robin) 
+name: Automated Code Review (Robin)
 
 on:
   pull_request:
@@ -13,6 +13,14 @@ permissions:
 
 jobs:
   review:
+    if: >
+      github.event_name == 'pull_request' ||
+      (
+        github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        startsWith(github.event.comment.body, '/robin') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+      )
     uses: antongulin/robin/.github/workflows/review.yml@af29cbb34dc8557110ab4e4b2b3e3d2f0bf9296d
     secrets:
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
