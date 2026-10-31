@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   review:
-    uses: antongulin/robin/.github/workflows/review.yml@main
+    uses: antongulin/robin/.github/workflows/review.yml@af29cbb34dc8557110ab4e4b2b3e3d2f0bf9296d
     secrets:
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
