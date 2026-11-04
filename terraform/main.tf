@@ -22,7 +22,8 @@ resource "hcloud_firewall" "myfirewall" {
     protocol  = "tcp"
     port      = "22"
     source_ips = [
-      chomp(data.http.personal_ip.response_body)
+      "${chomp(data.http.personal_ip.response_body)}/32"
+    ]
     ]
   }
 
