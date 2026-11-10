@@ -12,9 +12,11 @@ Homelab as code — a single-node Talos Linux Kubernetes cluster on Hetzner Clou
 ## Layout
 
 ```
-terraform/main.tf     # Hetzner server, firewall, Talos snapshot (imager)
+terraform/providers.tf    # provider declarations, backend, hcloud_token var
+terraform/main.tf         # variables, Talos snapshot (imager), server, firewall
 talos/controlplane.yaml.tmpl  # Talos machine config (substitute NODE_IP)
-README.md             # this file
+.gitignore                # excludes tfstate, tfvars, generated kubeconfig/talosconfig
+README.md                 # this file
 ```
 
 ## Prerequisites
@@ -39,7 +41,8 @@ terraform plan
 terraform apply
 
 # Grab the node IP
-terraform output -raw instance_ip
+NODE_IP=$(terraform output -raw instance_ip)
+echo $NODE_IP
 ```
 
 ## Bootstrap Talos + Kubernetes
@@ -49,23 +52,26 @@ From the Talos docs (gen config → apply-config → bootstrap → kubeconfig):
 ```bash
 NODE_IP=$(terraform output -raw instance_ip)
 
-# 1. Generate machine configs + talosconfig
+# 1. Render the machine config template with the node IP
+envsubst < ../talos/controlplane.yaml.tmpl > controlplane.yaml
+
+# 2. Generate talosconfig + machine configs
 talosctl gen config homelab "https://$NODE_IP:6443" \
   --install-disk /dev/sda \
   --output-dir talos
 
-# 2. Apply the control-plane config (installs Talos to disk)
+# 3. Apply the control-plane config (installs Talos to disk)
 talosctl apply-config --insecure \
   --nodes "$NODE_IP" \
-  --file talos/controlplane.yaml
+  --file controlplane.yaml
 
 # Wait for the node to reboot and become reachable, then:
 talosctl bootstrap --nodes "$NODE_IP" --endpoints "$NODE_IP"
 
-# 3. Fetch the kubeconfig
+# 4. Fetch the kubeconfig
 talosctl kubeconfig --nodes "$NODE_IP" --endpoints "$NODE_IP"
 
-# 4. Verify
+# 5. Verify
 kubectl get nodes
 kubectl get pods -A
 ```

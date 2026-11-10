@@ -1,61 +1,19 @@
-terraform {
-  required_version = ">= 1.9"
-  backend "s3" {
-    bucket = "homelab"
-    key    = "terraform.tfstate"
-    endpoints = {
-      s3 = "https://d3c4d0acfe187ae847011587c42c5f91.eu.r2.cloudflarestorage.com"
-    }
-    region                      = "auto"
-    skip_credentials_validation = true
-    skip_metadata_api_check     = true
-    skip_region_validation      = true
-    skip_requesting_account_id  = true
-    use_path_style              = true
-  }
-
-  required_providers {
-    hcloud = {
-      source  = "hetznercloud/hcloud"
-      version = "~> 1.70"
-    }
-    imager = {
-      source  = "hcloud-talos/imager"
-      version = "~> 0.1"
-    }
-  }
-}
-
-variable "hcloud_token" {
-  type      = string
-  sensitive = true
-  description = "Hetzner Cloud API token (set via HCLOUD_TOKEN or TF_VAR_hcloud_token)"
-}
-
 variable "talos_version" {
-  type    = string
-  default = "v1.14.5"
+  type        = string
+  default     = "v1.14.5"
   description = "Talos Linux version to deploy"
 }
 
 variable "location" {
-  type    = string
-  default = "nbg1"
+  type        = string
+  default     = "nbg1"
   description = "Hetzner Cloud location"
 }
 
 variable "server_type" {
-  type    = string
-  default = "cx23"
+  type        = string
+  default     = "cx23"
   description = "Hetzner Cloud server type"
-}
-
-provider "hcloud" {
-  token = var.hcloud_token
-}
-
-provider "imager" {
-  token = var.hcloud_token
 }
 
 data "http" "personal_ip" {
@@ -105,59 +63,59 @@ resource "hcloud_firewall" "talos" {
   }
 
   rule {
-    direction     = "in"
-    protocol      = "tcp"
-    port          = "22"
-    source_ips    = [local.admin_ip]
-    description   = "SSH"
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "22"
+    source_ips  = [local.admin_ip]
+    description = "SSH"
   }
 
   rule {
-    direction     = "in"
-    protocol      = "tcp"
-    port          = "50000"
-    source_ips    = [local.admin_ip]
-    description   = "Talos API (apid)"
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "50000"
+    source_ips  = [local.admin_ip]
+    description = "Talos API (apid)"
   }
 
   rule {
-    direction     = "in"
-    protocol      = "tcp"
-    port          = "6443"
-    source_ips    = [local.admin_ip]
-    description   = "Kubernetes API"
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "6443"
+    source_ips  = [local.admin_ip]
+    description = "Kubernetes API"
   }
 
   rule {
-    direction     = "in"
-    protocol      = "tcp"
-    port          = "10250"
-    source_ips    = [local.admin_ip]
-    description   = "kubelet"
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "10250"
+    source_ips  = [local.admin_ip]
+    description = "kubelet"
   }
 
   rule {
-    direction     = "in"
-    protocol      = "tcp"
-    port          = "2379-2380"
-    source_ips    = [local.admin_ip]
-    description   = "etcd"
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "2379-2380"
+    source_ips  = [local.admin_ip]
+    description = "etcd"
   }
 
   rule {
-    direction     = "in"
-    protocol      = "tcp"
-    port          = "50001"
-    source_ips    = [local.admin_ip]
-    description   = "trustd maintenance"
+    direction   = "in"
+    protocol    = "tcp"
+    port        = "50001"
+    source_ips  = [local.admin_ip]
+    description = "trustd maintenance"
   }
 
   rule {
-    direction     = "in"
-    protocol      = "udp"
-    port          = "4789"
-    source_ips    = [local.admin_ip]
-    description   = "VXLAN (CNI)"
+    direction   = "in"
+    protocol    = "udp"
+    port        = "4789"
+    source_ips  = [local.admin_ip]
+    description = "VXLAN (CNI)"
   }
 }
 
