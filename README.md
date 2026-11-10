@@ -22,9 +22,9 @@ README.md                 # this file
 ## Prerequisites
 
 - `TF_VAR_hcloud_token` set (Hetzner Cloud API token; read by the `hcloud_token` variable)
+- `TF_VAR_ssh_public_key` set (SSH public key content, passed to `hcloud_ssh_key.main`)
 - `terraform >= 1.9`
 - `talosctl` and `kubectl` installed locally
-- `~/.ssh/id_ed25519.pub` present (referenced by `hcloud_ssh_key.main`)
 
 ## Deploy
 
@@ -87,5 +87,6 @@ To use a custom Talos image (e.g. from Image Factory), edit `machine.install.ima
 - Generated `controlplane.yaml`, `kubeconfig`, and `talosconfig` are gitignored — do not commit them.
 - R2 state backend: ensure `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (or equivalent) are available wherever `terraform` runs.
 - Upgrading Talos: bumping `var.talos_version` forces a new `imager_image` resource (different `image_url`). Because the image has `prevent_destroy = true`, Terraform will refuse to destroy the old snapshot. To upgrade, temporarily remove `prevent_destroy`, run `terraform apply`, then re-add it (or manage the snapshot out-of-band and update `image_url` manually).
+- Admin IP: `data.http.personal_ip` fetches your public IP from a third-party service at plan time. If you run Terraform from CI or a different network, the firewall will allow the wrong IP and lock you out. Consider hardcoding your admin IP or using a static source.
 
 See issue #7 for context.

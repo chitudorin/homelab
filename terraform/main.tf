@@ -16,6 +16,11 @@ variable "server_type" {
   description = "Hetzner Cloud server type"
 }
 
+variable "ssh_public_key" {
+  type        = string
+  description = "SSH public key content for the node"
+}
+
 data "http" "personal_ip" {
   url = "https://ipv4.wtfismyip.com/text"
 }
@@ -54,7 +59,7 @@ resource "imager_image" "talos_x86" {
 
 resource "hcloud_ssh_key" "main" {
   name       = "my-ssh-key"
-  public_key = file("~/.ssh/id_ed25519.pub")
+  public_key = var.ssh_public_key
 }
 
 # Talos cluster firewall. Sensitive ports (50000 Talos API, 6443 Kubernetes API)
