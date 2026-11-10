@@ -1,0 +1,28 @@
+# Talos machine configuration for the homelab single-node control plane.
+# Generated values:
+#   - NODE_IP   : IPv4 address of the Hetzner server (terraform output instance_ip)
+#   - ENDPOINT  : https://<NODE_IP>:6443
+apiVersion: v1alpha1
+kind: Machine
+metadata:
+  name: node1
+spec:
+  controlPlane: true
+  cluster:
+    name: homelab
+    endpoint: https://NODE_IP:6443
+  install:
+    disk: /dev/sda
+    image: factory.talos.dev/image/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba/v1.14.5/hcloud-amd64.raw.xz
+  network:
+    interfaces:
+      - interface: eth0
+        dhcp: true
+  kubelet:
+    extraArgs:
+      node-ip: NODE_IP
+  ephemeral:
+    mount:
+      secure: true
+  features:
+    workloadIsolation: true

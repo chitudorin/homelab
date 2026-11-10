@@ -1,0 +1,15 @@
+# Sensitive / generated
+*.tfvars
+terraform.tfstate
+terraform.tfstate.backup
+*.tfplan
+
+# Talos
+talos/controlplane.yaml
+talos/secrets.yaml
+*.kubeconfig
+talosconfig
+
+# IDE
+.idea/
+.vscode/
