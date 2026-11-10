@@ -14,7 +14,7 @@ machine:
         dhcp: true
   kubelet:
     extraArgs:
-      node-ip: NODE_IP
+      node-ip: $NODE_IP
   ephemeral:
     mount:
       secure: true
@@ -22,5 +22,5 @@ machine:
     workloadIsolation: true
 cluster:
   controlPlane:
-    endpoint: https://NODE_IP:6443
+    endpoint: https://$NODE_IP:6443
   clusterName: homelab

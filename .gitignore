@@ -8,6 +8,7 @@ terraform.tfstate.backup
 talos/controlplane.yaml
 talos/secrets.yaml
 *.kubeconfig
+kubeconfig
 talosconfig
 
 # IDE

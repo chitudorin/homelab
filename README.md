@@ -14,14 +14,14 @@ Homelab as code — a single-node Talos Linux Kubernetes cluster on Hetzner Clou
 ```
 terraform/providers.tf    # provider declarations, backend, hcloud_token var
 terraform/main.tf         # variables, Talos snapshot (imager), server, firewall
-talos/controlplane.yaml.tmpl  # Talos machine config (substitute NODE_IP)
+talos/controlplane.yaml.tmpl  # Talos machine config (substitute $NODE_IP)
 .gitignore                # excludes tfstate, tfvars, generated kubeconfig/talosconfig
 README.md                 # this file
 ```
 
 ## Prerequisites
 
-- `HCLOUD_TOKEN` set (Hetzner Cloud API token)
+- `TF_VAR_hcloud_token` set (Hetzner Cloud API token; read by the `hcloud_token` variable)
 - `terraform >= 1.9`
 - `talosctl` and `kubectl` installed locally
 - `~/.ssh/id_ed25519.pub` present (referenced by `hcloud_ssh_key.main`)
@@ -52,29 +52,28 @@ From the Talos docs (gen config → apply-config → bootstrap → kubeconfig):
 ```bash
 NODE_IP=$(terraform output -raw instance_ip)
 
-# 1. Render the machine config template with the node IP
-envsubst < ../talos/controlplane.yaml.tmpl > controlplane.yaml
-
-# 2. Generate talosconfig + machine configs
+# 1. Generate talosconfig + machine configs (includes cluster secrets)
 talosctl gen config homelab "https://$NODE_IP:6443" \
   --install-disk /dev/sda \
   --output-dir talos
 
-# 3. Apply the control-plane config (installs Talos to disk)
+# 2. Apply the control-plane config (installs Talos to disk)
 talosctl apply-config --insecure \
   --nodes "$NODE_IP" \
-  --file controlplane.yaml
+  --file talos/controlplane.yaml
 
 # Wait for the node to reboot and become reachable, then:
 talosctl bootstrap --nodes "$NODE_IP" --endpoints "$NODE_IP"
 
-# 4. Fetch the kubeconfig
+# 3. Fetch the kubeconfig
 talosctl kubeconfig --nodes "$NODE_IP" --endpoints "$NODE_IP"
 
-# 5. Verify
+# 4. Verify
 kubectl get nodes
 kubectl get pods -A
 ```
+
+To use a custom Talos image (e.g. from Image Factory), edit `machine.install.image` in the generated `talos/controlplane.yaml` before applying, or adapt `talos/controlplane.yaml.tmpl` and render it with `envsubst` (`$NODE_IP` is substituted automatically).
 
 ## Notes
 

@@ -54,8 +54,11 @@ resource "hcloud_ssh_key" "main" {
 }
 
 # Talos cluster firewall. Sensitive ports (50000 Talos API, 6443 Kubernetes API)
-# are restricted to the admin IP; internal ports are scoped the same way for a
-# single-node homelab. See Talos ingress-firewall docs for port meanings.
+# are restricted to the admin IP; internal ports (kubelet, etcd, VXLAN, trustd)
+# are scoped the same way for a single-node homelab. See Talos ingress-firewall docs.
+# NOTE: when adding worker nodes or a load balancer, scope internal-port rules
+# to the node/private network CIDR instead of the admin IP, otherwise cross-node
+# traffic will be silently blocked by the Hetzner firewall.
 resource "hcloud_firewall" "talos" {
   name = "talos-firewall"
   labels = {
