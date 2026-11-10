@@ -62,6 +62,9 @@ talosctl apply-config --insecure \
   --nodes "$NODE_IP" \
   --file talos/controlplane.yaml
 
+# Point talosctl at the generated config before bootstrap/kubeconfig
+export TALOSCONFIG=talos/talosconfig
+
 # Wait for the node to reboot and become reachable, then:
 talosctl bootstrap --nodes "$NODE_IP" --endpoints "$NODE_IP"
 
