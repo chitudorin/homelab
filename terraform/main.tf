@@ -102,16 +102,16 @@ resource "hcloud_firewall" "talos" {
     direction   = "in"
     protocol    = "tcp"
     port        = "10250"
-    source_ips  = [local.admin_ip]
-    description = "kubelet"
+    source_ips  = [local.admin_ip, "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+    description = "kubelet (admin IP + private ranges for hairpin/local traffic)"
   }
 
   rule {
     direction   = "in"
     protocol    = "tcp"
     port        = "2379-2380"
-    source_ips  = [local.admin_ip]
-    description = "etcd"
+    source_ips  = [local.admin_ip, "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+    description = "etcd (admin IP + private ranges for hairpin/local traffic)"
   }
 
   rule {

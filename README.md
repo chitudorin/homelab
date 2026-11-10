@@ -53,8 +53,11 @@ From the Talos docs (gen config → apply-config → bootstrap → kubeconfig):
 NODE_IP=$(terraform output -raw instance_ip)
 
 # 1. Generate talosconfig + machine configs (includes cluster secrets)
+# Use the Image Factory hcloud image (not the default metal ISO) so the node
+# boots as a cloud instance on Hetzner.
 talosctl gen config homelab "https://$NODE_IP:6443" \
   --install-disk /dev/sda \
+  --image factory.talos.dev/image/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba/v1.14.5/hcloud-amd64.raw.xz \
   --output-dir talos
 
 # 2. Apply the control-plane config (installs Talos to disk)
