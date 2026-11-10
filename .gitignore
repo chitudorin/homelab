@@ -12,6 +12,9 @@ talos/worker.yaml
 kubeconfig
 talosconfig
 
+# Terraform
+.terraform/
+
 # IDE
 .idea/
 .vscode/

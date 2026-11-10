@@ -40,6 +40,10 @@ resource "imager_image" "talos_x86" {
   }
 
   lifecycle {
+    # prevent_destroy keeps the Talos snapshot stable across applies.
+    # When bumping var.talos_version, image_url changes and Terraform wants to
+    # replace the image — prevent_destroy blocks that. To upgrade, temporarily
+    # remove this line, apply, then re-add it (or manage the snapshot out-of-band).
     prevent_destroy = true
   }
 

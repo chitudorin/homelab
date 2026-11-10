@@ -76,7 +76,9 @@ kubectl get nodes
 kubectl get pods -A
 ```
 
-To use a custom Talos image (e.g. from Image Factory), edit `machine.install.image` in the generated `talos/controlplane.yaml` before applying, or adapt `talos/controlplane.yaml.tmpl` and render it with `envsubst` (`$NODE_IP` is substituted automatically).
+To use a custom Talos image (e.g. from Image Factory), edit `machine.install.image` in the generated `talos/controlplane.yaml` before applying.
+
+> **Note:** `talos/controlplane.yaml.tmpl` is a reference template only — it does not contain cluster secrets (`cluster.id`, `cluster.secret`, CA material, cert SANs). Applying a rendered copy to a fresh node will not produce a bootstrappable cluster. Always apply the `talosctl gen config` output, which embeds the cluster secrets, and use the template only for diffing against the generated config.
 
 ## Notes
 
@@ -84,5 +86,6 @@ To use a custom Talos image (e.g. from Image Factory), edit `machine.install.ima
 - Sensitive ports (50000 Talos API, 6443 K8s API) are restricted to your admin IP.
 - Generated `controlplane.yaml`, `kubeconfig`, and `talosconfig` are gitignored — do not commit them.
 - R2 state backend: ensure `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (or equivalent) are available wherever `terraform` runs.
+- Upgrading Talos: bumping `var.talos_version` forces a new `imager_image` resource (different `image_url`). Because the image has `prevent_destroy = true`, Terraform will refuse to destroy the old snapshot. To upgrade, temporarily remove `prevent_destroy`, run `terraform apply`, then re-add it (or manage the snapshot out-of-band and update `image_url` manually).
 
 See issue #7 for context.
